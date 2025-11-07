@@ -21,12 +21,13 @@ int maint(){
    return newCell;
  }
 
- t_list *createList(){
+ t_list createemptyList(void){
    t_list *newList = (t_list *)malloc(sizeof(t_list));
-   newList->head = NULL;
-   newList->tail = NULL;
+   newList->first = NULL;
    return newList;
  }
+
+
 
 void add_cell(t_list *list, t_cell *cell){
   t_cell *newCell = createCell(cell->value);
