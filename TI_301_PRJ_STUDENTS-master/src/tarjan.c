@@ -1,7 +1,7 @@
 #define _GNU_SOURCE
 #include "tarjan.h"
 
-/* structure de pile simple pour entiers (index de vertex 1..n) */
+
 typedef struct int_stack {
     int *data;
     int top;
@@ -32,7 +32,7 @@ static int stack_peek(int_stack *s) {
 static int stack_empty(int_stack *s) { return s->top == 0; }
 static void stack_free(int_stack *s) { SAFE_FREE(s->data); }
 
-/* helper pour t_class */
+
 static void class_init(t_class *c, int capacity, const char *name) {
     c->vertices = MALLOC_OR_DIE(int, capacity);
     c->count = 0;
@@ -49,7 +49,7 @@ static void class_add_vertex(t_class *c, int v) {
 }
 static void class_free(t_class *c) { SAFE_FREE(c->vertices); }
 
-/* partition helpers */
+
 static void partition_init(t_partition *p) {
     p->capacity = 8;
     p->count = 0;
@@ -61,10 +61,10 @@ static void partition_add_class(t_partition *p, t_class *c) {
         p->classes = (t_class*)realloc(p->classes, sizeof(t_class) * p->capacity);
         if (!p->classes) { perror("realloc partition"); exit(EXIT_FAILURE); }
     }
-    p->classes[p->count++] = *c; /* copie la structure (vertices alloués gardés) */
+    p->classes[p->count++] = *c;
 }
 
-/* Fonction récursive 'strongconnect' (parcours Tarjan) */
+
 static void strongconnect(int v, adjacency_list_t const *g,
                           t_tarjan_vertex *V, int *index_counter,
                           int_stack *S, t_partition *result) {
@@ -74,28 +74,25 @@ static void strongconnect(int v, adjacency_list_t const *g,
     stack_push(S, v);
     V[v-1].onstack = 1;
 
-    /* pour chacune des arêtes v->w */
+
     cell_t *cur = g->lists[v-1].head;
     while (cur) {
         int w = cur->to;
         if (V[w-1].index == -1) {
-            /* w n'a pas encore été visité : récursion */
             strongconnect(w, g, V, index_counter, S, result);
             if (V[w-1].lowlink < V[v-1].lowlink)
                 V[v-1].lowlink = V[w-1].lowlink;
         } else if (V[w-1].onstack) {
-            /* w est dans la pile => mise à jour de lowlink */
             if (V[w-1].index < V[v-1].lowlink)
                 V[v-1].lowlink = V[w-1].index;
         }
         cur = cur->next;
     }
 
-    /* Si v est racine d'une SCC */
+
     if (V[v-1].lowlink == V[v-1].index) {
-        /* créer une nouvelle classe */
         t_class c;
-        class_init(&c, 4, "C?"); /* nom temporaire, on renomme après */
+        class_init(&c, 4, "C?");
         while (1) {
             int w = stack_pop(S);
             if (w == -1) break;
@@ -103,14 +100,14 @@ static void strongconnect(int v, adjacency_list_t const *g,
             class_add_vertex(&c, w);
             if (w == v) break;
         }
-        /* nommer la classe (C<k>) */
+
         int k = result->count + 1;
         snprintf(c.name, sizeof(c.name), "C%d", k);
         partition_add_class(result, &c);
     }
 }
 
-/* Fonction publique : tarjan_partition */
+
 t_partition tarjan_partition(const adjacency_list_t *g) {
     t_partition result;
     partition_init(&result);
@@ -134,13 +131,13 @@ t_partition tarjan_partition(const adjacency_list_t *g) {
         }
     }
 
-    /* cleanup V and stack */
+
     stack_free(&S);
     free(V);
     return result;
 }
 
-/* libération d'une partition */
+
 void free_partition(t_partition *p) {
     if (!p) return;
     for (int i = 0; i < p->count; ++i) {
@@ -151,15 +148,14 @@ void free_partition(t_partition *p) {
     p->capacity = 0;
 }
 
-/* construit une table map_out (taille n) tal que map_out[i-1] = index de composante contenant i */
+
 int vertex_to_component_map(const t_partition *p, int n, int *map_out) {
     if (!p || !map_out) return -1;
-    /* initialisation: -1 si pas trouvé (devrait pas arriver) */
     for (int i = 0; i < n; ++i) map_out[i] = -1;
     for (int ci = 0; ci < p->count; ++ci) {
         for (int j = 0; j < p->classes[ci].count; ++j) {
             int v = p->classes[ci].vertices[j];
-            map_out[v-1] = ci; /* index de classe (0..count-1) */
+            map_out[v-1] = ci;
         }
     }
     return 0;

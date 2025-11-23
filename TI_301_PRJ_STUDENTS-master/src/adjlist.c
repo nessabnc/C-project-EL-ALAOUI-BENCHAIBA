@@ -1,6 +1,6 @@
 #include "adjlist.h"
 
-/* crée une cellule */
+
 static cell_t* create_cell(int to, float prob) {
     cell_t *c = (cell_t*)malloc(sizeof(cell_t));
     if (!c) {
@@ -13,7 +13,7 @@ static cell_t* create_cell(int to, float prob) {
     return c;
 }
 
-/* crée une adjacency list vide de taille n (initialise les heads à NULL) */
+
 static adjacency_list_t create_empty_adjlist(int n) {
     adjacency_list_t g;
     g.n = n;
@@ -26,8 +26,7 @@ static adjacency_list_t create_empty_adjlist(int n) {
     return g;
 }
 
-/* ajoute une arête from -> to avec probabilité prob.
-   Note: on insère en tête pour complexité O(1). */
+
 void addEdgeAdj(adjacency_list_t *g, int from, int to, float prob) {
     if (!g) return;
     if (from < 1 || from > g->n || to < 1 || to > g->n) {
@@ -36,15 +35,10 @@ void addEdgeAdj(adjacency_list_t *g, int from, int to, float prob) {
     }
     cell_t *c = create_cell(to, prob);
     int idx = from - 1;
-    /* insertion en tête (plus simple pour affichage) */
     c->next = g->lists[idx].head;
     g->lists[idx].head = c;
 }
 
-/* lit un fichier au format :
-   ligne 1 : nombre de sommets
-   lignes suivantes : start end prob
-*/
 adjacency_list_t readGraph(const char *filename) {
     FILE *file = fopen(filename, "rt");
     if (!file) {
@@ -69,7 +63,7 @@ adjacency_list_t readGraph(const char *filename) {
     return g;
 }
 
-/* affiche la liste d'adjacence de façon lisible */
+
 void printAdjacencyList(const adjacency_list_t *g) {
     if (!g) return;
     printf("Adjacency list (n=%d):\n", g->n);
@@ -84,7 +78,7 @@ void printAdjacencyList(const adjacency_list_t *g) {
     }
 }
 
-/* somme des probabilités sortantes d'un sommet (utilisé pour validation Markov) */
+
 float outgoingSum(const adjacency_list_t *g, int vertex) {
     if (!g) return 0.0f;
     if (vertex < 1 || vertex > g->n) return 0.0f;
@@ -97,7 +91,7 @@ float outgoingSum(const adjacency_list_t *g, int vertex) {
     return s;
 }
 
-/* libération mémoire complète de la structure */
+
 void freeAdjacencyList(adjacency_list_t *g) {
     if (!g) return;
     if (g->lists) {
