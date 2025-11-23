@@ -1,0 +1,1 @@
+/usr/bin/cc  -Wall -Wextra -g -arch arm64 -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/markov.dir/main.c.o CMakeFiles/markov.dir/src/adjlist.c.o CMakeFiles/markov.dir/src/tarjan.c.o CMakeFiles/markov.dir/src/hasse.c.o CMakeFiles/markov.dir/src/matrix.c.o -o markov
